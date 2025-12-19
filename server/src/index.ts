@@ -1,22 +1,17 @@
-function myName(name : String){
-    console.log(name)
-}
+import console = require("node:console");
+
+const express = require("express");
+const app = express();
+const port = 3000;
+
+app.get("/", (req : String ,res : any)=>{
+    res.json({
+        message : "Welcome to express server"
+    })
+});
 
 
 
-function myNumber(num : Number){
-    console.log("Number is :" + num)
-}
-myName("Hi Developer : This is a typescript project");
-myNumber(35);
-
-interface name {
-    FirstName : String
-    LastName : String
-    userId : number
-}
-
-function giveDetails(info : name){
-
-    console.log(info)
-}
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`)
+});
