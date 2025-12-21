@@ -12,3 +12,9 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model student{
+  id String @id @default(cuid())
+  email String @unique
+  name String
+}
