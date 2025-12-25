@@ -12,3 +12,9 @@ model student {
   email String @unique
   name  String
 }
+
+model teacher {
+  id String @id 
+  email String @unique
+  name String
+}
