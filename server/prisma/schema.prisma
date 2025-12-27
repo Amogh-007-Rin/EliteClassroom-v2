@@ -13,12 +13,46 @@ datasource db {
   provider = "postgresql"
 }
 
+// Admin Schema For EliteClassroom
 model admin{
   id Int @id @default(autoincrement())
   fullName String
   email String @unique
   username String @unique
   password String
-  contact Int @unique
+  contact BigInt @unique
+  createdAt DateTime @default(now())
+}
+
+// Student Schema For EliteClassroom
+model student{
+  studentId Int @id @default(autoincrement())
+  fullName String
+  email String @unique
+  username String @unique
+  contact BigInt? @unique
+  password String
+  createdAt DateTime @default(now())
+}
+
+// Mentor Schema For EliteClassroom
+model mentor{
+  mentorId Int @id @default(autoincrement())
+  fullName String
+  email String @unique
+  username String @unique
+  contact BigInt @unique
+  password String
+  createdAt DateTime @default(now())
+}
+
+// Teacher Schema For EliteClassroom
+model teacher{
+  teacherId Int @id @default(autoincrement())
+  fullName String
+  email String @unique
+  username String @unique
+  contact BigInt @unique
+  password String
   createdAt DateTime @default(now())
 }
