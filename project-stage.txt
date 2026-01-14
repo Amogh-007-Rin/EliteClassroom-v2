@@ -1,0 +1,96 @@
+What I Built
+
+- Backend scaffolded with Express, TypeScript, Prisma, Zod, JWT, Argon2
+- Database schema defined to match execution.md and Prisma client generated
+- Auth endpoints: register, login, me with HttpOnly cookie-based JWT
+- Tutors API with subject filtering and profile/subjects aggregation
+- Booking API with overlap protection via prisma.$transaction
+- Seed script with 2 tutors, 2 students, and subjects
+- Frontend scaffolded with Vite React TS, TailwindCSS
+- Global state via TanStack Query and axios with withCredentials
+- Auth screens: Login and Register connected to the API
+- Marketplace pages: Tutors list with subject search, Tutor profile with booking form
+- Dashboard split by role with upcoming/past sessions and payment status placeholder
+- Dummy Video Room page per MVP constraint
+- Dev servers running for both client and server
+Backend
+
+- Server entry and middleware
+  - Express app, cors, helmet, cookie-parser, JSON, routes
+  - Code: server.ts
+- Prisma setup and schema
+  - Matches execution.md exactly, provider postgresql
+  - Code: schema.prisma
+  - Client: prisma.ts
+- Validation middleware
+  - Zod-based body/query/params validation
+  - Code: validate.ts
+- Auth middleware
+  - JWT verify from req.cookies, sets req.user
+  - Code: auth.ts
+- Auth routes
+  - POST /api/auth/register, POST /api/auth/login, GET /api/auth/me
+  - Code: auth.ts
+- Tutors route
+  - GET /api/tutors with optional ?subject= filtering
+  - Code: tutors.ts
+- Bookings route
+  - POST /api/bookings with overlap check in prisma.$transaction
+  - GET /api/bookings/me for role-based listing
+  - Code: bookings.ts
+- Seed script
+  - Subjects: Math, Physics, Chemistry, Biology; 2 students, 2 tutors, tutor subjects
+  - Code: seed.ts
+- Server start
+  - Entrypoint: index.ts
+Frontend
+
+- App shell and routing
+  - Routes: /, /login, /register, /tutors, /tutor/:id, /dashboard, /room/:id
+  - Code: App.tsx
+- TanStack Query and axios
+  - Query provider: QueryProvider.tsx
+  - Axios instance with withCredentials: api.ts
+  - App bootstrap: main.tsx
+- TailwindCSS
+  - Config: tailwind.config.js
+  - PostCSS: postcss.config.js
+  - CSS entry: index.css
+- Pages
+  - Home: subject search and quick links Home.tsx
+  - Login: RHF + zod + API Login.tsx
+  - Register: role select, personal info Register.tsx
+  - Tutors: list with subject filter Tutors.tsx
+  - Tutor Profile: bio/rate/subjects + booking form TutorProfile.tsx
+  - Dashboard: role-aware sessions lists Dashboard.tsx
+  - Video Room placeholder Room.tsx
+How to Run
+
+- Prerequisites
+  - PostgreSQL running locally and accessible via DATABASE_URL
+  - .env placed at server root; a template was added at server/.env.example . A starter .env is already placed at server/.env .
+- Install and generate Prisma
+  - In server: npm install
+  - Generate client: npm run prisma:generate
+  - Migrate: npm run prisma:migrate
+  - Seed: npm run prisma:seed
+- Dev servers
+  - Server: npm run dev in server (now running on http://localhost:5000 )
+  - Client: npm run dev in client (opened at http://localhost:5173 ). Preview: http://localhost:5173/
+- Flow verification
+  - Register Student and Tutor via UI; login as Student
+  - Find tutors on Home or Tutors page; open a tutor profile
+  - Book a session; overlap protection enforced at the API layer
+  - Dashboard shows upcoming/past for Students; appointments/payment status for Tutors
+  - Video Room link renders the placeholder page
+Notes
+
+- Overlap logic uses a transaction and simple time-range intersection under status not CANCELLED, matching execution.md guidance.
+- Auth with HttpOnly cookies; axios is configured with withCredentials to carry cookies.
+- For Shadcn/UI, Tailwind base components are used to meet MVP swiftly. You can run shadcn CLI later to pull component files if desired.
+Next Steps
+
+- If PostgreSQL isn’t installed, please set it up or point DATABASE_URL to a hosted Postgres, then run migration and seed.
+- Optional: add more Shadcn components (Button, Input, Card, Dialog, Select, Avatar) for richer UI.
+- Optional: add route guards for /dashboard and redirect to /login when unauthenticated.
+All tasks completed and dev servers are live.
