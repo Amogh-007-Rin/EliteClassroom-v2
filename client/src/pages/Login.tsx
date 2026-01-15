@@ -3,6 +3,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "../lib/api";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
   email: z.string().email(),
@@ -25,22 +28,41 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Login</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        <div>
-          <label className="block text-sm font-medium">Email</label>
-          <input className="border rounded w-full p-2" type="email" {...register("email")} />
-          {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Password</label>
-          <input className="border rounded w-full p-2" type="password" {...register("password")} />
-          {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
-        </div>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded" disabled={isSubmitting}>Login</button>
-      </form>
+    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <CardDescription>
+            Sign in to manage your sessions and bookings.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Email</label>
+              <Input type="email" {...register("email")} />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email.message}</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Password</label>
+              <Input type="password" {...register("password")} />
+              {errors.password && (
+                <p className="text-xs text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+            <Button className="w-full" disabled={isSubmitting}>
+              Login
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="justify-center text-xs text-muted-foreground">
+          Use the same account to book and attend sessions.
+        </CardFooter>
+      </Card>
     </div>
   );
 }
-

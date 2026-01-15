@@ -32,6 +32,8 @@ model User {
   tutorBookings   Booking[]    @relation("TutorBookings")
   sentMessages    Message[]    @relation("SentMessages")
   receivedMessages Message[]   @relation("ReceivedMessages")
+
+  reviews Review[]
 }
 
 model TutorProfile {
@@ -43,6 +45,8 @@ model TutorProfile {
   verified      Boolean         @default(false)
   subjects      TutorSubject[]
   availabilities Availability[]
+
+  reviews Review[]
 }
 
 model Subject {
@@ -88,4 +92,15 @@ model Message {
   receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   content     String
   sentAt      DateTime @default(now())
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  tutorId     Int
+  profile     TutorProfile @relation(fields: [tutorId], references: [id])
+  studentId   Int
+  student     User     @relation(fields: [studentId], references: [id])
+  rating      Int      @default(0)
+  comment     String?
+  createdAt   DateTime @default(now())
 }
