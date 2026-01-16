@@ -6,6 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const app_1 = __importDefault(require("./app"));
 const port = Number(process.env.PORT ?? 4000);
+app_1.default.get("/server/test/running", (req, res) => {
+    res.json({
+        message: "Server is running",
+        testStatus: "Passed"
+    });
+});
 app_1.default.listen(port, () => {
     console.log(`Server listening on http://localhost:${port}`);
 });

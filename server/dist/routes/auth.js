@@ -49,7 +49,7 @@ router.post("/login", (0, validate_1.validate)(loginSchema), async (req, res) =>
     const secret = process.env.JWT_SECRET ?? "dev-secret";
     const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role, email: user.email }, secret, { expiresIn: "7d" });
     res.cookie("token", token, { httpOnly: true, sameSite: "lax" });
-    return res.json({ id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName });
+    return res.json({ id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName, message: "Login successful" });
 });
 router.get("/me", async (req, res) => {
     const token = req.cookies?.token;
