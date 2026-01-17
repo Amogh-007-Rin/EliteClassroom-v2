@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               Int           @id @default(autoincrement())
+  email            String        @unique
+  passwordHash     String
+  firstName        String
+  lastName         String
+  role             UserRole      @default(STUDENT)
+  createdAt        DateTime      @default(now())
+  studentBookings  Booking[]     @relation("StudentBookings")
+  tutorBookings    Booking[]     @relation("TutorBookings")
+  receivedMessages Message[]     @relation("ReceivedMessages")
+  sentMessages     Message[]     @relation("SentMessages")
+  reviews          Review[]
+  profile          TutorProfile?
+}
+
+model TutorProfile {
+  id             Int            @id @default(autoincrement())
+  userId         Int            @unique
+  bio            String?
+  hourlyRate     Decimal        @db.Decimal(10, 2)
+  verified       Boolean        @default(false)
+  availabilities Availability[]
+  reviews        Review[]
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjects       TutorSubject[]
+}
+
+model Subject {
+  id     Int            @id @default(autoincrement())
+  name   String         @unique
+  tutors TutorSubject[]
+}
+
+model TutorSubject {
+  tutorId   Int
+  subjectId Int
+  subject   Subject      @relation(fields: [subjectId], references: [id])
+  tutor     TutorProfile @relation(fields: [tutorId], references: [id])
+
+  @@id([tutorId, subjectId])
+}
+
+model Booking {
+  id        Int           @id @default(autoincrement())
+  studentId Int
+  tutorId   Int
+  startTime DateTime
+  endTime   DateTime
+  status    BookingStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  student   User          @relation("StudentBookings", fields: [studentId], references: [id])
+  tutor     User          @relation("TutorBookings", fields: [tutorId], references: [id])
+}
+
+model Availability {
+  id        Int          @id @default(autoincrement())
+  tutorId   Int
+  startTime DateTime
+  endTime   DateTime
+  isBooked  Boolean      @default(false)
+  profile   TutorProfile @relation(fields: [tutorId], references: [id])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  content    String
+  sentAt     DateTime @default(now())
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+}
+
+model Review {
+  id        Int          @id @default(autoincrement())
+  tutorId   Int
+  studentId Int
+  rating    Int          @default(0)
+  comment   String?
+  createdAt DateTime     @default(now())
+  student   User         @relation(fields: [studentId], references: [id])
+  profile   TutorProfile @relation(fields: [tutorId], references: [id])
+}
+
+enum UserRole {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
