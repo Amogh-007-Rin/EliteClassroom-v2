@@ -92,14 +92,14 @@ EliteClassroom-v2/
 Before running the project, ensure you have the following installed:
 
 - **Node.js** (>= 18.0.0) - [Download here](https://nodejs.org/)
-- **PostgreSQL** - Local installation or a hosted instance (e.g., Supabase, Railway)
+- **PostgreSQL** - Local installation or a hosted instance (e.g., Supabase, Railway, Neon.tech)
 - **Git** - For cloning the repository
 
 ## Installation
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/EliteClassroom-v2.git
+   git clone https://github.com/Amogh-007-Rin/EliteClassroom-v2.git
    cd EliteClassroom-v2
    ```
 
@@ -187,7 +187,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Authors
 
-- **Your Name** - *Initial work* - [Your GitHub](https://github.com/your-username)
+- **Amogh Dath K A** - *Developed-by* - [Your GitHub](https://github.com/Amogh-007-Rin)
 
 ## Acknowledgments
 
@@ -199,5 +199,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have any questions or need help, please open an issue on GitHub or reach out to the maintainers.
 
 ---
+I Will be active on this following platforms :-
+01. Personal Email : amoghdath233@gmail.com
+02. Student Email  : amoghdath.kalasapura.arunkumar@mail.bcu.ac.uk
 
 Happy coding! 🚀
