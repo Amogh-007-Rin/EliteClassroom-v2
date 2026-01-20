@@ -201,6 +201,6 @@ If you have any questions or need help, please open an issue on GitHub or reach 
 ---
 I Will be active on this following platforms :-
 01. Personal Email : amoghdath233@gmail.com
-02. Student Email  : amoghdath.kalasapura.arunkumar@mail.bcu.ac.uk
+02. Student Email  : amoghdath.kalasapuraarunkumar@mail.bcu.ac.uk
 
 Happy coding! 🚀
