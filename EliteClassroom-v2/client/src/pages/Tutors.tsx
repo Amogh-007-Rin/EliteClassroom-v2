@@ -80,9 +80,9 @@ export default function Tutors() {
                   </p>
 
                   <div className="flex flex-wrap gap-2 mb-8">
-                    {tutor.subjects?.map((s: any) => (
-                      <span key={s.subject?.id || Math.random()} className="bg-gray-50 text-gray-600 text-sm px-3 py-1.5 rounded-xl border border-gray-100 font-bold">
-                        {s.subject?.name || 'Subject'}
+                    {tutor.subjects?.map((subject: string, index: number) => (
+                      <span key={index} className="bg-gray-50 text-gray-600 text-sm px-3 py-1.5 rounded-xl border border-gray-100 font-bold">
+                        {subject}
                       </span>
                     ))}
                   </div>
