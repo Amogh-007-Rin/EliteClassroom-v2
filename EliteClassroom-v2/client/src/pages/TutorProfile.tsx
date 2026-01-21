@@ -34,7 +34,7 @@ export default function TutorProfile() {
   const handleBook = (e: React.FormEvent) => {
     e.preventDefault();
     bookingMutation.mutate({
-      tutorId: Number(id),
+      tutorId: tutor.user.id,
       startTime: new Date(startTime).toISOString(),
       endTime: new Date(endTime).toISOString(),
     });

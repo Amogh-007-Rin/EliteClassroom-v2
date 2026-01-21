@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth";
 import tutorsRouter from "./routes/tutors";
 import bookingsRouter from "./routes/bookings";
+import reviewsRouter from "./routes/reviews";
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/api/auth", authRouter);
 app.use("/api/tutors", tutorsRouter);
 app.use("/api/bookings", bookingsRouter);
+app.use("/api/reviews", reviewsRouter);
 
 export default app;

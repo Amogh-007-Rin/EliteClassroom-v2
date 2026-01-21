@@ -46,7 +46,43 @@ router.post("/", auth, validate(bookingSchema), async (req: Request, res: Respon
   return res.json(result);
 });
 
-export default router;
+router.patch("/:id", auth, async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id as string);
+  const { status } = req.body;
+  const userId = (req as any).user?.id;
+
+  if (!["CONFIRMED", "CANCELLED"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status" });
+  }
+
+  try {
+    const booking = await prisma.booking.findUnique({ where: { id } });
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+
+    // Only tutor can confirm/cancel (or student can cancel?)
+    // For now, let's allow Tutor to Confirm/Cancel, and Student to Cancel.
+    if (booking.tutorId !== userId && booking.studentId !== userId) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    if (booking.studentId === userId && status === "CONFIRMED") {
+      return res.status(403).json({ error: "Students cannot confirm bookings" });
+    }
+
+    const updated = await prisma.booking.update({
+      where: { id },
+      data: { status },
+      include: {
+        student: { select: { id: true, firstName: true, lastName: true, email: true } },
+        tutor: { select: { id: true, firstName: true, lastName: true, email: true } },
+      }
+    });
+    return res.json(updated);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.get("/me", auth, async (req: Request, res: Response) => {
   const userId = (req as any).user?.id as number | undefined;
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -54,7 +90,13 @@ router.get("/me", auth, async (req: Request, res: Response) => {
     where: {
       OR: [{ studentId: userId }, { tutorId: userId }],
     },
+    include: {
+      student: { select: { id: true, firstName: true, lastName: true, email: true } },
+      tutor: { select: { id: true, firstName: true, lastName: true, email: true } },
+    },
     orderBy: { startTime: "asc" },
   });
   return res.json(bookings);
 });
+
+export default router;

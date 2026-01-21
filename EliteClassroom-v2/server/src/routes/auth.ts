@@ -52,6 +52,11 @@ router.post("/login", validate(loginSchema), async (req: Request, res: Response)
   return res.json({ id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName, message: "Login successful" });
 });
 
+router.post("/logout", (req: Request, res: Response) => {
+  res.clearCookie("token");
+  return res.json({ message: "Logout successful" });
+});
+
 router.get("/me", async (req: Request, res: Response) => {
   const token = req.cookies?.token;
   if (!token) return res.status(401).json({ error: "Unauthorized" });

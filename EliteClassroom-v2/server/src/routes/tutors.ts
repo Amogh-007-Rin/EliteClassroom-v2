@@ -14,18 +14,34 @@ const updateProfileSchema = z.object({
 
 router.get("/", async (req: Request, res: Response) => {
   const subject = typeof req.query.subject === "string" ? req.query.subject : undefined;
+  const verified = req.query.verified === 'true';
+  const minRate = req.query.minRate ? Number(req.query.minRate) : undefined;
+  const maxRate = req.query.maxRate ? Number(req.query.maxRate) : undefined;
+
+  const where: any = {};
+  
+  if (subject) {
+    where.subjects = {
+      some: {
+        subject: {
+          name: { contains: subject, mode: "insensitive" },
+        },
+      },
+    };
+  }
+
+  if (verified) {
+    where.verified = true;
+  }
+
+  if (minRate !== undefined || maxRate !== undefined) {
+    where.hourlyRate = {};
+    if (minRate !== undefined) where.hourlyRate.gte = minRate;
+    if (maxRate !== undefined) where.hourlyRate.lte = maxRate;
+  }
+
   const tutors = await prisma.tutorProfile.findMany({
-    where: subject
-      ? {
-          subjects: {
-            some: {
-              subject: {
-                name: { contains: subject, mode: "insensitive" },
-              },
-            },
-          },
-        }
-      : undefined,
+    where,
     select: {
       id: true,
       bio: true,

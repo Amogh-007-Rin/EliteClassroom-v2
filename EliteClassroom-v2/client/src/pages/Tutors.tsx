@@ -2,14 +2,19 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
-import { Search, Filter, Star, Clock, MapPin, ArrowRight } from 'lucide-react';
+import { Search, Filter, Star, Clock, MapPin, ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function Tutors() {
   const [subject, setSubject] = useState('');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
   const { data: tutors, isLoading } = useQuery({
-    queryKey: ['tutors', subject],
+    queryKey: ['tutors', subject, verifiedOnly],
     queryFn: async () => {
-      const res = await api.get('/tutors' + (subject ? `?subject=${subject}` : ''));
+      let url = `/tutors?subject=${encodeURIComponent(subject)}`;
+      if (verifiedOnly) url += '&verified=true';
+      const res = await api.get(url);
       return res.data;
     }
   });
@@ -34,11 +39,26 @@ export default function Tutors() {
               />
               <Search className="absolute left-4 top-4.5 text-gray-400 w-6 h-6" />
             </div>
-            <button className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center hover:bg-gray-800 transition">
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-8 py-4 rounded-2xl font-bold flex items-center justify-center transition ${showFilters ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-900 text-white hover:bg-gray-800'}`}
+            >
               <Filter className="w-5 h-5 mr-2" />
-              <span>More Filters</span>
+              <span>{showFilters ? 'Hide Filters' : 'More Filters'}</span>
             </button>
           </div>
+
+          {showFilters && (
+             <div className="mt-6 p-6 bg-gray-50 rounded-2xl border border-gray-100 animate-in fade-in slide-in-from-top-4 max-w-3xl">
+                <label className="flex items-center space-x-3 cursor-pointer w-fit">
+                   <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition ${verifiedOnly ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-300'}`}>
+                      {verifiedOnly && <CheckCircle className="w-4 h-4 text-white" />}
+                   </div>
+                   <input type="checkbox" className="hidden" checked={verifiedOnly} onChange={() => setVerifiedOnly(!verifiedOnly)} />
+                   <span className="font-bold text-gray-700">Show only verified tutors</span>
+                </label>
+             </div>
+          )}
         </div>
       </div>
 

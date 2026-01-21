@@ -21,7 +21,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await api.post('/auth/login', {});
+      await api.post('/auth/logout', {});
       queryClient.setQueryData(['me'], null);
       navigate('/login');
     } catch (err) {

@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Calendar, Clock, Video, ChevronRight, GraduationCap, LayoutDashboard, Settings, LogOut, BookOpen, Save, CheckCircle, XCircle } from 'lucide-react';
+import ReviewModal from '../components/ReviewModal';
+import { Calendar, Clock, Video, ChevronRight, GraduationCap, LayoutDashboard, Settings, LogOut, BookOpen, Save, CheckCircle, XCircle, Star } from 'lucide-react';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -46,6 +53,44 @@ export default function Dashboard() {
     }
   });
 
+  const reviewMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return api.post('/reviews', data);
+    },
+    onSuccess: () => {
+      setReviewModalOpen(false);
+      alert('Review submitted successfully!');
+      setComment('');
+      setRating(5);
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.error || 'Failed to submit review');
+    }
+  });
+
+  const updateBookingMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      return api.patch(`/bookings/${id}`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      alert('Booking status updated!');
+    },
+    onError: (error: any) => {
+      alert(error.response?.data?.error || 'Failed to update booking');
+    }
+  });
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout', {});
+      queryClient.setQueryData(['me'], null);
+      navigate('/login');
+    } catch (err) {
+      navigate('/login');
+    }
+  };
+
   const [formData, setFormData] = useState({
     bio: '',
     hourlyRate: '',
@@ -81,6 +126,7 @@ export default function Dashboard() {
   );
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50/30 flex">
       {/* Sidebar Nav - Desktop */}
       <aside className="w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-6 sticky top-16 h-[calc(100vh-64px)]">
@@ -102,7 +148,10 @@ export default function Dashboard() {
         </div>
         
         <div className="pt-6 border-t border-gray-50">
-          <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-bold text-red-500 hover:bg-red-50 transition-all">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl font-bold text-red-500 hover:bg-red-50 transition-all"
+          >
             <LogOut className="w-5 h-5" />
             <span>Sign Out</span>
           </button>
@@ -111,6 +160,8 @@ export default function Dashboard() {
 
       <main className="flex-1 p-6 lg:p-12">
         <div className="max-w-5xl mx-auto">
+          {/* Content moved inside this div */}
+        </div>
           <header className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center space-x-3 mb-2">
@@ -137,18 +188,18 @@ export default function Dashboard() {
               <section className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
                 <div className="px-8 py-6 border-b border-gray-50 flex justify-between items-center">
                   <h2 className="text-xl font-black text-gray-900">Upcoming Sessions</h2>
-                  <span className="text-blue-600 font-bold text-sm cursor-pointer hover:underline">View All</span>
+                  <button onClick={() => setActiveTab('bookings')} className="text-blue-600 font-bold text-sm cursor-pointer hover:underline">View All</button>
                 </div>
                 
                 <div className="divide-y divide-gray-50">
-                  {bookings?.length === 0 ? (
+                  {bookings?.filter((b: any) => b.status === 'CONFIRMED' && new Date(b.startTime) > new Date()).length === 0 ? (
                     <div className="p-20 text-center text-gray-400 flex flex-col items-center">
                       <Calendar className="w-12 h-12 mb-4 opacity-20" />
-                      <p className="font-bold text-lg">No sessions scheduled yet.</p>
+                      <p className="font-bold text-lg">No upcoming sessions.</p>
                       <p className="text-sm">Time to book your first lesson!</p>
                     </div>
                   ) : (
-                    bookings?.map((booking: any) => (
+                    bookings?.filter((b: any) => b.status === 'CONFIRMED' && new Date(b.startTime) > new Date()).map((booking: any) => (
                       <div key={booking.id} className="p-8 hover:bg-gray-50/50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div className="flex items-center space-x-6">
                           <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl font-black">
@@ -224,6 +275,81 @@ export default function Dashboard() {
           </div>
           )}
 
+          {activeTab === 'bookings' && (
+            <div className="space-y-8">
+               <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+                  <div className="px-8 py-6 border-b border-gray-50">
+                    <h2 className="text-xl font-black text-gray-900">My Bookings</h2>
+                  </div>
+                  <div className="divide-y divide-gray-50">
+                     {bookings?.length === 0 ? (
+                        <div className="p-20 text-center text-gray-400">
+                           <Calendar className="w-12 h-12 mb-4 mx-auto opacity-20" />
+                           <p className="font-bold text-lg">No bookings found.</p>
+                        </div>
+                     ) : (
+                        bookings?.map((booking: any) => (
+                           <div key={booking.id} className="p-8 hover:bg-gray-50 transition flex flex-col md:flex-row md:items-center justify-between gap-6">
+                              <div className="flex items-center space-x-4">
+                                 <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 font-black text-lg">
+                                    {user.role === 'STUDENT' ? booking.tutor?.firstName?.[0] : booking.student?.firstName?.[0]}
+                                 </div>
+                                 <div>
+                                    <h4 className="font-bold text-gray-900 text-lg">
+                                       {user.role === 'STUDENT' ? `${booking.tutor?.firstName} ${booking.tutor?.lastName}` : `${booking.student?.firstName} ${booking.student?.lastName}`}
+                                    </h4>
+                                    <div className="flex items-center text-gray-500 text-sm font-medium mt-1">
+                                       <Calendar className="w-4 h-4 mr-1.5" />
+                                       <span>{new Date(booking.startTime).toLocaleDateString()}</span>
+                                       <Clock className="w-4 h-4 ml-4 mr-1.5" />
+                                       <span>{new Date(booking.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                 <span className={`px-4 py-2 rounded-xl text-sm font-bold ${
+                                    booking.status === 'CONFIRMED' || booking.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 
+                                    booking.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                                 }`}>
+                                    {booking.status}
+                                 </span>
+                                 {user.role === 'STUDENT' && (
+                                    <button 
+                                      onClick={() => {
+                                         setSelectedBooking(booking);
+                                         setReviewModalOpen(true);
+                                      }}
+                                      className="p-2 text-gray-400 hover:text-yellow-500 transition"
+                                      title="Leave a Review"
+                                    >
+                                       <Star className="w-5 h-5" />
+                                    </button>
+                                 )}
+                                 {user.role === 'TUTOR' && booking.status === 'PENDING' && (
+                                    <>
+                                       <button 
+                                         onClick={() => updateBookingMutation.mutate({id: booking.id, status: 'CONFIRMED'})}
+                                         className="px-4 py-2 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition"
+                                       >
+                                         Accept
+                                       </button>
+                                       <button 
+                                         onClick={() => updateBookingMutation.mutate({id: booking.id, status: 'CANCELLED'})}
+                                         className="px-4 py-2 bg-red-100 text-red-600 rounded-xl font-bold text-sm hover:bg-red-200 transition"
+                                       >
+                                         Decline
+                                       </button>
+                                    </>
+                                 )}
+                              </div>
+                           </div>
+                        ))
+                     )}
+                  </div>
+               </div>
+            </div>
+          )}
+
           {activeTab === 'settings' && (
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
@@ -289,8 +415,25 @@ export default function Dashboard() {
                 </div>
             </div>
           )}
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+
+      <ReviewModal 
+        isOpen={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        onSubmit={(r, c) => reviewMutation.mutate({
+          tutorId: selectedBooking?.tutor?.id,
+          rating: r,
+          comment: c
+        })}
+        tutorName={selectedBooking?.tutor?.firstName}
+        rating={rating}
+        setRating={setRating}
+        comment={comment}
+        setComment={setComment}
+        isSubmitting={reviewMutation.isPending}
+      />
+    </>
   );
 }
+
